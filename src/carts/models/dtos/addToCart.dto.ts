@@ -1,11 +1,11 @@
 import { IsEmail, IsInt, IsNotEmpty, IsString } from 'class-validator';
 
 export class AddToCartDto {
-  @IsString()
+  @IsInt()
   @IsNotEmpty()
-  productId: string;
+  productId: number;
 
   @IsInt()
   @IsNotEmpty()
-  quantity: string;
+  quantity: number;
 }

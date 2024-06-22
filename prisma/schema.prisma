@@ -33,7 +33,7 @@ model User {
 
   address Address?
   orders  Order[]
-  carts Cart[]
+  carts Cart?
 }
 
 model Product {
@@ -78,12 +78,11 @@ model OrderItem {
 model Cart {
   id Int @id @default(autoincrement())
 
-  userId    Int
-  user      User        @relation(fields: [userId], references: [id])
-  deviceId String? @unique
+  userId    Int @unique 
+  user      User @relation(fields: [userId], references: [id])
 
   createdAt DateTime @default(now())
-  cartItem CartItem[]
+  cartItems CartItem[]
 }
 
 model CartItem {
@@ -92,7 +91,6 @@ model CartItem {
   cartId   Int
   productId Int
   quantity  Int
-  price     Float
 
   cart   Cart   @relation(fields: [cartId], references: [id])
   product Product @relation(fields: [productId], references: [id])

@@ -5,8 +5,19 @@ import { ConfigModule } from '@nestjs/config';
 import { UsersModule } from './users/users.module';
 import { CartsModule } from './carts/carts.module';
 import { ProductsModule } from './products/products.module';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
-  imports: [ConfigModule.forRoot({ isGlobal: true }), AuthModule, PrismaModule, UsersModule, CartsModule, ProductsModule],
+  imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
+    JwtModule.register({
+      global: true,
+    }),
+    AuthModule,
+    PrismaModule,
+    UsersModule,
+    CartsModule,
+    ProductsModule,
+  ],
 })
 export class AppModule {}

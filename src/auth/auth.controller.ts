@@ -1,6 +1,8 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthDto } from './dto';
+import { AuthGuard } from './auth.guard';
+import { GetUser } from './auth.decorator';
 
 @Controller('auth')
 export class AuthController {
@@ -15,5 +17,10 @@ export class AuthController {
   @Post('signin')
   signin(@Body() dto: AuthDto) {
     return this.authService.signin(dto);
+  }
+  @UseGuards(AuthGuard)
+  @Get('me')
+  me(@GetUser() tokenPayload) {
+    return this.authService.me({ id: tokenPayload.sub });
   }
 }

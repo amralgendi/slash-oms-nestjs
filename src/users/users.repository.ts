@@ -39,7 +39,7 @@ export class UsersRepository {
     }
   }
 
-  async update(user: User): Promise<User> {
+  async update(user: Prisma.UserUpdateInput & { id: number }): Promise<User> {
     user.updatedAt = new Date();
 
     return await this.prisma.user.update({

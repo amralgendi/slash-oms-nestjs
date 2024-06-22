@@ -7,7 +7,7 @@ import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthService {
-  tokenSecret: string;
+  private tokenSecret: string;
 
   constructor(
     private userRepository: UsersRepository,
@@ -35,7 +35,7 @@ export class AuthService {
   }
 
   async signup({ email, password }: AuthDto) {
-    // CHECK IF EMAIL EXIST - THIS IS NOT NEEDED SINCE EMAIL IN EMAIL WILL BE UNIQUE IN POSTGRES
+    // CHECK IF EMAIL EXIST - THIS IS OPTIONAL SINCE WE ALREADY USE THE CREATE METHOD FROM THE USER REPOSITORY
 
     // GENERATE HASH
     const hash = await argon.hash(password);
@@ -76,5 +76,12 @@ export class AuthService {
     };
 
     return await this.generateTokens(idTokenPayload, { sub: user.id });
+  }
+
+  async me({ id }: { id: number }) {
+    const user = await this.userRepository.getById(id);
+
+    delete user.hash;
+    return user;
   }
 }
