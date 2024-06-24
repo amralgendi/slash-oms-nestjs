@@ -3,10 +3,10 @@ import { CartsService } from './carts.service';
 import { CartsController } from './carts.controller';
 import { CartsRepository } from './carts.repository';
 import { ProductsModule } from 'src/products/products.module';
+import { ProductsRepository } from 'src/products/products.repository';
 
 @Module({
-  imports: [ProductsModule],
-  providers: [CartsService, CartsRepository],
+  providers: [CartsService, CartsRepository, ProductsRepository],
   controllers: [CartsController],
 })
 export class CartsModule {}

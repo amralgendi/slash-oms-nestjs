@@ -2,15 +2,16 @@ import { Injectable } from '@nestjs/common';
 import { Cart, CartItem, Prisma } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 
-type CartItemWrapped = Omit<CartItem, 'id' | 'cartId'> & {
-  id?: number;
-};
+type CartItemWrapped = Omit<CartItem, 'cartId'>;
 
 type CartWrapped = Cart & {
   cartItems: CartItemWrapped[];
 };
 
-type CartCreate = Omit<CartWrapped, 'id' | 'cartItems' | 'createdAt'>;
+type CartCreate = Omit<
+  CartWrapped,
+  'id' | 'cartItems' | 'createdAt' | 'updatedAt'
+>;
 
 @Injectable()
 export class CartsRepository {
@@ -20,7 +21,6 @@ export class CartsRepository {
     return {
       ...cart,
       cartItems: cart.cartItems.map<{
-        id?: number;
         productId: number;
         quantity: number;
       }>(({ cartId, ...ci }) => ci),
@@ -43,6 +43,7 @@ export class CartsRepository {
   }
 
   async create(cart: CartCreate) {
+    console.log(cart.userId);
     const fetchedCart = await this.prisma.cart.create({
       data: cart,
       include: {
@@ -54,35 +55,80 @@ export class CartsRepository {
   }
 
   async update(cart: CartWrapped) {
-    console.log(JSON.stringify(cart, null, 1));
     const { id, cartItems, ...data } = cart;
 
-    return this.formattedCart(
-      await this.prisma.cart.update({
-        where: {
-          id: cart.id,
-        },
-        data: {
-          ...data,
-          cartItems: {
-            deleteMany: {
-              id: {
-                notIn: cartItems.filter((ci) => ci.id).map((ci) => ci.id),
-              },
+    data.updatedAt = new Date();
+
+    const updatedCart = await this.prisma.cart.update({
+      where: {
+        id,
+      },
+      data: {
+        ...data,
+        cartItems: {
+          deleteMany: {
+            productId: {
+              notIn: cartItems
+                .filter((ci) => ci.productId)
+                .map((ci) => ci.productId),
             },
-            upsert: cartItems.map((ci) => ({
+          },
+          upsert: cartItems.map((ci) => {
+            console.log({
+              cartId: id,
+              productId: ci.productId,
+            });
+
+            return {
               where: {
-                id: ci.id ?? -1,
+                cartId_productId: {
+                  cartId: id,
+                  productId: ci.productId,
+                },
+                cartId: id,
+                productId: ci.productId,
               },
+
               create: ci,
               update: ci,
-            })),
-          },
+            };
+          }),
         },
-        include: {
-          cartItems: true,
-        },
-      }),
-    );
+      },
+      include: {
+        cartItems: true,
+      },
+    });
+
+    // cartItems: {
+    //   upsert: cartItems.map((ci) => ({
+    //     create: ci,
+    //     update: ci,
+    //     where: {
+    //       cartId_productId: {
+    //         cartId: id,
+    //         productId: ci.productId,
+    //       },
+    //     },
+    //   })),
+    // },
+
+    return this.formattedCart(updatedCart);
+
+    // ...data,
+    // cartItems: {
+    //   deleteMany: {
+    //     id: {
+    //       notIn: cartItems.filter((ci) => ci.id).map((ci) => ci.id),
+    //     },
+    //   },
+    //   upsert: cartItems.map((ci) => ({
+    //     where: {
+    //       id: ci.id ?? -1,
+    //     },
+    //     create: ci,
+    //     update: ci,
+    //   })),
+    // },
   }
 }

@@ -10,7 +10,7 @@ export class AuthService {
   private tokenSecret: string;
 
   constructor(
-    private userRepository: UsersRepository,
+    private userService: UsersRepository,
     private jwtService: JwtService,
     config: ConfigService,
   ) {
@@ -41,10 +41,11 @@ export class AuthService {
     const hash = await argon.hash(password);
 
     // SAVE USER
-    const user = await this.userRepository.create({
+    const user = await this.userService.create({
       email,
       hash,
     });
+
     delete user.hash;
 
     const idTokenPayload = {
@@ -58,7 +59,7 @@ export class AuthService {
   }
 
   async signin({ email, password }) {
-    const user = await this.userRepository.getByEmail(email);
+    const user = await this.userService.getByEmail(email);
 
     if (!user) {
       throw new ForbiddenException('Wrong Credentials!');
@@ -76,12 +77,5 @@ export class AuthService {
     };
 
     return await this.generateTokens(idTokenPayload, { sub: user.id });
-  }
-
-  async me({ id }: { id: number }) {
-    const user = await this.userRepository.getById(id);
-
-    delete user.hash;
-    return user;
   }
 }

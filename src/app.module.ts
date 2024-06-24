@@ -6,6 +6,8 @@ import { UsersModule } from './users/users.module';
 import { CartsModule } from './carts/carts.module';
 import { ProductsModule } from './products/products.module';
 import { JwtModule } from '@nestjs/jwt';
+import { OrdersModule } from './orders/orders.module';
+import { CouponsModule } from './coupons/coupons.module';
 
 @Module({
   imports: [
@@ -17,7 +19,8 @@ import { JwtModule } from '@nestjs/jwt';
     PrismaModule,
     UsersModule,
     CartsModule,
-    ProductsModule,
+    OrdersModule,
+    CouponsModule,
   ],
 })
 export class AppModule {}

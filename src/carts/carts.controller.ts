@@ -10,13 +10,7 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import {
-  AddToCartCommand,
-  AddToCartDto,
-  RemoveFromCartCommand,
-  UpdateToCartCommand,
-  ViewCartQuery,
-} from './models';
+import { AddToCartDto } from './models';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { GetUser } from 'src/auth/auth.decorator';
 import { CartsService } from './carts.service';
@@ -28,10 +22,15 @@ export class CartsController {
 
   @UseGuards(AuthGuard)
   @Post('/add')
-  async addToCart(@Body() body: AddToCartDto, @GetUser() { sub }) {
-    return await this.cartsService.addToCart(
-      AddToCartCommand.new(sub, body.productId, body.quantity),
-    );
+  async addToCart(
+    @Body() { productId, quantity }: AddToCartDto,
+    @GetUser() { sub },
+  ) {
+    return await this.cartsService.addToCart({
+      userId: sub,
+      productId,
+      quantity,
+    });
   }
 
   @UseGuards(AuthGuard)
@@ -40,9 +39,7 @@ export class CartsController {
     @Query('productId', ParseIntPipe) productId: number,
     @GetUser() { sub },
   ) {
-    return await this.cartsService.removeFromCart(
-      RemoveFromCartCommand.new(sub, productId),
-    );
+    return await this.cartsService.removeFromCart({ userId: sub, productId });
   }
 
   @UseGuards(AuthGuard)
@@ -51,7 +48,7 @@ export class CartsController {
     @Param('userId', ParseIntPipe) userId: number,
     @GetUser() { sub },
   ) {
-    return await this.cartsService.viewCart(ViewCartQuery.new(sub, userId));
+    return await this.cartsService.viewCart({ tokenUserId: sub, userId });
   }
 
   @UseGuards(AuthGuard)
@@ -60,8 +57,10 @@ export class CartsController {
     @Body() { productId, quantity }: UpdateToCartDto,
     @GetUser() { sub },
   ) {
-    return await this.cartsService.updateToCart(
-      UpdateToCartCommand.new(sub, productId, quantity),
-    );
+    return await this.cartsService.updateToCart({
+      userId: sub,
+      productId,
+      quantity,
+    });
   }
 }

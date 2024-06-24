@@ -43,7 +43,6 @@ export class CartsService {
     });
 
     const updatedCart = await this.cartRepository.update(cart);
-
     return updatedCart;
   }
 

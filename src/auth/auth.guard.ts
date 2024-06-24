@@ -7,6 +7,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
+import { UsersRepository } from 'src/users/users.repository';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -31,7 +32,12 @@ export class AuthGuard implements CanActivate {
 
       // 💡 We're assigning the payload to the request object here
       // so that we can access it in our route handlers
+
       request['user'] = payload;
+
+      // if (!(await this.userRepository.getById(payload.sub))) {
+      //   throw new UnauthorizedException();
+      // }
     } catch (e) {
       throw new UnauthorizedException();
     }
